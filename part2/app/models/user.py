@@ -10,12 +10,12 @@ class User(BaseModel):
         self.places = []
         self.reviews = []
 
-    def add_place(self, place)
+    def add_place(self, place):
         """Add a place to the user"""
         self.places.append(place)
 
 
-    def add_review(self, review)
+    def add_review(self, review):
         """Add a review to the user"""
         self.reviews.append(review)
 
