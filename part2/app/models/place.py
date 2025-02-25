@@ -79,7 +79,7 @@ class Place(BaseModel):
         """
         if not isinstance(value, (int, float)):
             raise ValueError('latitude must be a number')
-        if value < -90.0 or value > 90.0
+        if value < -90.0 or value > 90.0:
             raise ValueError('latitude must be between -90 and 90')
         self.__latitude = value
 
@@ -96,9 +96,9 @@ class Place(BaseModel):
         """
         Set the place longitude.
         """
-        if not isinstance(value, (int, float))
+        if not isinstance(value, (int, float)):
             raise("longitude must be a number")
-        if value < -180.0 or value > 180.0
+        if value < -180.0 or value > 180.0:
             raise ValueError('longitude must be between -180 and 180')
         self.__longitude = value
 
