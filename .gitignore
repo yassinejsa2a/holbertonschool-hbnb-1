@@ -1,1 +1,8 @@
 part2/app/__pycache__/__init__.cpython-312.pyc
+part2/app/services/__pycache__/facade.cpython-312.pyc
+part2/app/services/__pycache__/__init__.cpython-312.pyc
+part2/app/persistence/__pycache__/__init__.cpython-312.pyc
+part2/app/persistence/__pycache__/repository.cpython-312.pyc
+part2/app/api/v1/__pycache__/users.cpython-312.pyc
+part2/app/api/__pycache__/__init__.cpython-312.pyc
+part2/app/api/v1/__pycache__/__init__.cpython-312.pyc
