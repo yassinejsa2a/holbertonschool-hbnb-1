@@ -15,6 +15,12 @@ class HBnBFacade:
         return user
 
 
+    def update_user(self, user_id, user_data):
+        user = self.get_user(user_id)
+        if user:
+            self.user_repo.update(user_id, user_data)
+
+
     def get_user(self, user_id):
         return self.user_repo.get(user_id)
 
