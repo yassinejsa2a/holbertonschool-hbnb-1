@@ -12,3 +12,6 @@ part2/app/models/__pycache__/__init__.cpython-312.pyc
 part2/app/api/v1/__pycache__/reviews.cpython-312.pyc
 part2/app/api/v1/__pycache__/amenities.cpython-312.pyc
 part2/app/api/v1/__pycache__/places.cpython-312.pyc
+part2/app/models/__pycache__/amenity.cpython-312.pyc
+part2/app/models/__pycache__/place.cpython-312.pyc
+part2/app/models/__pycache__/review.cpython-312.pyc
