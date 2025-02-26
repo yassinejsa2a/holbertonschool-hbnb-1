@@ -44,9 +44,7 @@ class HBnBFacade:
         return place
     
     def get_all_places(self):
-        place = Place(**place_data)
-        self.place_repo.add(place)
-        return place
+        return self.place_repo.get_all()
 
     def get_place_by_title(self, title):
         return self.place_repo.get_by_attribute('title', title)
