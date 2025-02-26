@@ -7,8 +7,6 @@ class User(BaseModel):
         self.last_name = last_name
         self.email = email
         self.is_admin = is_admin
-        self.places = []
-        self.reviews = []
 
     def add_place(self, place):
         """Add a place to the user"""

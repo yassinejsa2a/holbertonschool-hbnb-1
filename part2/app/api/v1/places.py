@@ -1,5 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask import request, jsonify
+
 
 api = Namespace('places', description='Place operations')
 
@@ -44,14 +46,43 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new place"""
-        # Placeholder for the logic to register a new place
-        pass
+        place_data = api.payload
+        print("Payload received:", place_data)
+
+        user = facade.get_user(place_data.get('owner_id'))
+        print("User found:", user)
+        if user is None:
+            return {'error': 'Invalid owner_id'}, 400
+
+        del place_data['owner_id']
+        place_data['owner'] = user
+        if place_data.get('amenities'):
+            for amenity in place_data.get('amenities'):
+                if facade.get_amenity(amenity['id']) is None:
+                    return {'error': 'Invalid amenity ID'}, 400
+
+        try:
+            place = facade.create_place(place_data)
+            return {
+                'id': place.id,
+                'title': place.title,
+                'description': place.description,
+                'price': place.price,
+                'latitude': place.latitude,
+                'longitude': place.longitude,
+                'owner_id': place.owner.id,
+                }, 201
+        except ValueError as e:
+            return {'error': str(e)}, 400
+
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
         """Retrieve a list of all places"""
-        # Placeholder for logic to return a list of all places
-        pass
+        places = facade.get_all_places()
+        if not places:
+            return {'error': 'No places found'}, 404
+        return {'places': [{'id': place.id, 'title': place.title, 'description': place.description, 'price': place.price, 'latitude': place.latitude, 'longitude': place.longitude, 'owner': place.owner, 'amenities': place.amenities} for place in places]}, 200
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
@@ -59,8 +90,10 @@ class PlaceResource(Resource):
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get place details by ID"""
-        # Placeholder for the logic to retrieve a place by ID, including associated owner and amenities
-        pass
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'place not found'}, 404
+        return {'id': place.id, 'title': place.title, 'description': place.description, 'price': place.price, 'latitude': place.latitude, 'longitude': place.longitude, 'owner': place.owner, 'amenities': place.amenities}, 200
 
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
