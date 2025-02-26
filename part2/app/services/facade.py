@@ -37,6 +37,14 @@ class HBnBFacade:
     # Place
     def get_place(self, place_id):
         return self.place_repo.get(place_id)
+    
+    def get_all_places(self):
+        place = Place(**place_data)
+        self.place_repo.add(place)
+        return place
+
+    def get_place_by_title(self, title):
+        return self.place_repo.get_by_attribute('title', title)
 
     """
     Amenity
@@ -66,3 +74,4 @@ class HBnBFacade:
         Update an amenity.
         """
         return self.amenity_repo.update(amenity_id, **amenity_data)
+    
