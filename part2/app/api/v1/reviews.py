@@ -36,7 +36,7 @@ class ReviewList(Resource):
     def get(self):
         """Retrieve a list of all reviews"""
         # Placeholder for logic to return a list of all reviews
-        reviews = facade.get_all_reviews()
+        reviews = facade.get_reviews()
         return {'reviews': [review.to_dict() for review in reviews]}, 200
 
 @api.route('/<review_id>')
