@@ -12,6 +12,16 @@ user_model = api.model('User', {
 
 @api.route('/')
 class UserList(Resource):
+    @api.response(200, 'Users list retrieved successfully') 
+    @api.response(404, 'Users not found')
+    def get(self):
+        """Get users list"""
+        users = facade.get_all_users()
+        if not users:
+            return {'error': 'No users found'}, 404
+        return {'users': [user.to_dict() for user in users]}, 200
+
+
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
@@ -38,3 +48,14 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
+
+@api.route('/api/v1/users/')
+class UsersList(Resource):
+    @api.response(200, 'Users list retrieved successfully') 
+    @api.response(404, 'Users not found')
+    def get_all(self):
+        """get users list"""
+        users = facade.get_all_users()
+        if not users:
+            return {'error': 'No users found'}, 404
+        return {'users': [user.to_dict() for user in users]}, 200
