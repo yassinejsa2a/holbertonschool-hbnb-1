@@ -2,7 +2,7 @@ from app.models.base import BaseModel
 from app.models.user import User
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner):
+    def __init__(self, title, description, price, latitude, longitude, owner, amenities=()):
         super().__init__()
         self.title = title
         self.description = description
@@ -11,7 +11,7 @@ class Place(BaseModel):
         self.longitude = longitude
         self.owner = owner
         self.reviews = []
-        self.amenities = []
+        self.amenities = amenities
 
     def add_review(self, review):
         """Add a review to the place."""
