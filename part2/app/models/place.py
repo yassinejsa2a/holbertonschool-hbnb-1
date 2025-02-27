@@ -9,7 +9,7 @@ class Place(BaseModel):
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner_id
+        self.owner_id = owner_id
         self.amenities = []
 
     def add_review(self, review):

@@ -44,24 +44,19 @@ class PlaceList(Resource):
         place_data = api.payload
 
         try:
-            # Recherche de l'utilisateur avec l'ID fourni dans la requête
+            # First check if the owner exists
             owner = facade.get_user(place_data['owner_id'])
             if not owner:
                 return {'error': 'Owner not found'}, 404
 
-            # Vérifie si le titre du lieu existe déjà
-            place_existing = facade.get_place_by_title(place_data['title'])
-            if place_existing:
+            # Check for existing place with same title
+            existing_place = facade.get_place_by_title(place_data['title'])
+            if existing_place:
                 return {'error': 'Title already registered'}, 400
 
-            # Prépare les données pour créer le lieu
-            place_data['owner'] = owner.id  # Utilisation de l'ID de l'utilisateur
-            del place_data['owner_id']  # Supprime l'ID du propriétaire des données
-
-
-            # Crée le nouveau lieu
+            # Create new place if owner exists and title is unique
             new_place = facade.create_place(place_data)
-
+        
             return {
                 'id': new_place.id,
                 'title': new_place.title,
@@ -69,11 +64,13 @@ class PlaceList(Resource):
                 'price': new_place.price,
                 'latitude': new_place.latitude,
                 'longitude': new_place.longitude,
-                'owner_id': new_place.owner
+                'owner_id': new_place.owner_id,
             }, 201
 
         except ValueError as e:
             return {'error': str(e)}, 400
+
+
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
