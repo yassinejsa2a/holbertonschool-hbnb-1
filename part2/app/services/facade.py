@@ -49,32 +49,46 @@ class HBnBFacade:
     def get_place_by_title(self, title):
         return self.place_repo.get_by_attribute('title', title)
 
-    """
-    Amenity
-    """
+    def update_place(self, place_id, place_data):
+        return self.place_repo.update(place_id, place_data)
+
+    # Amenity
     def create_amenity(self, amenity_data):
-        """
-        Create a new amenity.
-        """
         new_amenity = Amenity(**amenity_data)
         self.amenity_repo.add(new_amenity)
         return new_amenity
 
     def get_amenity(self, amenity_id):
-        """
-        Get an amenity by ID.
-        """
         return self.amenity_repo.get(amenity_id)
 
     def get_all_amenities(self):
-        """
-        Get all amenities.
-        """
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
-        """
-        Update an amenity.
-        """
         return self.amenity_repo.update(amenity_id, amenity_data)
-    
+
+    # Review
+    def create_reviews(self, reviews_data):
+        reviews = Reviews(**reviews_data)
+        self.reviews_repo.add(reviews)
+        return reviews
+
+    def get_review(self, review_id):
+        return self.review_repo.get(review_id)
+
+    def get_all_reviews(self):
+        return self.review_repo.get_all()
+
+
+    def get_reviews_by_place(self, place_id):
+        place = self.get_place(place_id)
+        if not place:
+            return None
+            
+        return [
+            review for review in self.review_repo.get_all() 
+            if review.place_id == place_id
+        ]
+
+    def update_review(self, review_id, review_data):
+        return self.review_repo.update(review_id, review_data)

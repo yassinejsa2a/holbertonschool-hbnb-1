@@ -66,6 +66,8 @@ class User(BaseModel):
         """
         Set the user's email.
         """
+        if not isinstance(value, str) or '@' not in value:
+            raise ValueError("Valid email is required")
         self.__email = value
 
     @property
