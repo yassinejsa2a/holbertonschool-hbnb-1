@@ -44,17 +44,14 @@ class PlaceList(Resource):
         place_data = api.payload
 
         try:
-            # First check if the owner exists
             owner = facade.get_user(place_data['owner_id'])
             if not owner:
                 return {'error': 'Owner not found'}, 404
 
-            # Check for existing place with same title
             existing_place = facade.get_place_by_title(place_data['title'])
             if existing_place:
                 return {'error': 'Title already registered'}, 400
 
-            # Create new place if owner exists and title is unique
             new_place = facade.create_place(place_data)
         
             return {
