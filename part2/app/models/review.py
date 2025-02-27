@@ -62,6 +62,8 @@ class Review(BaseModel):
         """
         if not isinstance(value, User):
             raise ValueError('user must be an instance of User.')
+        if not value.exists():
+            raise ValueError('User does not exist.')
         self.__user = value
 
     @property
@@ -78,4 +80,6 @@ class Review(BaseModel):
         """
         if not isinstance(value, Place):
             raise ValueError('place must be an instance of Place.')
+        if not value.exists():
+            raise ValueError('Place does not exist.')
         self.__place = value

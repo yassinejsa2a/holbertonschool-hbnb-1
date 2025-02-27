@@ -1,4 +1,5 @@
 from app.models.base import BaseModel
+import uuid
 
 class Amenity(BaseModel):
     """
@@ -23,4 +24,6 @@ class Amenity(BaseModel):
         """
         Set the amenity's name.
         """
+        if not value or len(value) > 50:
+            raise ValueError("Name must be provided and be at most 50 characters long.")
         self.__name = value
