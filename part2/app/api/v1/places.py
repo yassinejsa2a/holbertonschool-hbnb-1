@@ -69,8 +69,7 @@ class PlaceList(Resource):
                 'price': new_place.price,
                 'latitude': new_place.latitude,
                 'longitude': new_place.longitude,
-                'owner_id': new_place.owner,  # Retourne l'ID du propriétaire
-                'amenities': [amenity.id for amenity in new_place.amenities]  # Liste des ID des amenités
+                'owner_id': new_place.owner
             }, 201
 
         except ValueError as e:

@@ -6,15 +6,15 @@ class Review(BaseModel):
     """
     Represents a review of a place.
     """
-    def __init__(self, text, rating, user, place):
+    def __init__(self, text, rating, user_id, place_id):
         """
         Initialize a new review.
         """
         super().__init__()
         self.text = text
         self.rating = rating
-        self.user = user
-        self.place = place
+        self.user_id= user_id
+        self.place_id = place_id
 
     @property
     def text(self):
