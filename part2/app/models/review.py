@@ -53,33 +53,25 @@ class Review(BaseModel):
         """
         Get the review's user.
         """
-        return self.__user
+        return self.__user_id
     
     @user.setter
     def user(self, value):
         """
         Set the review's user.
         """
-        if not isinstance(value, User):
-            raise ValueError('user must be an instance of User.')
-        if not value.exists():
-            raise ValueError('User does not exist.')
-        self.__user = value
+        self.__user_id = value
 
     @property
     def place(self):
         """
         Get the review's place.
         """
-        return self.__place
+        return self.__place_id
     
     @place.setter
     def place(self, value):
         """
         Set the review's place.
         """
-        if not isinstance(value, Place):
-            raise ValueError('place must be an instance of Place.')
-        if not value.exists():
-            raise ValueError('Place does not exist.')
-        self.__place = value
+        self.__place_id = value

@@ -2,16 +2,15 @@ from app.models.base import BaseModel
 from app.models.user import User
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner, amenities=()):
+    def __init__(self, title, description, price, latitude, longitude, owner_id):
         super().__init__()
         self.title = title
         self.description = description
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner
-        self.reviews = []
-        self.amenities = amenities
+        self.owner = owner_id
+        self.amenities = []
 
     def add_review(self, review):
         """Add a review to the place."""
@@ -97,7 +96,7 @@ class Place(BaseModel):
         Set the place longitude.
         """
         if not isinstance(value, (int, float)):
-            raise("longitude must be a number")
+            raise ValueError("longitude must be a number")
         if value < -180.0 or value > 180.0:
             raise ValueError('longitude must be between -180 and 180')
         self.__longitude = value
@@ -107,15 +106,11 @@ class Place(BaseModel):
         """
         Get the place owner.
         """
-        return self.__owner
+        return self.__owner_id
 
     @owner.setter
     def owner(self, value):
         """
         Set the place owner.
         """
-        if not isinstance(value, User):
-            raise ValueError(
-                'Owner must be a User object'
-                )
-        self.__owner = value
+        self.__owner_id = value
