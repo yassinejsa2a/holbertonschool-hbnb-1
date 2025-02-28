@@ -106,11 +106,16 @@ class Place(BaseModel):
         """
         Get the place owner.
         """
-        return self.__owner_id
+        # Import here to prevent circular imports
+        from app.services import facade
+        return facade.get_user(self.owner_id)
 
     @owner.setter
     def owner(self, value):
         """
         Set the place owner.
         """
-        self.__owner_id = value
+        if hasattr(value, 'id'):
+            self.owner_id = value.id
+        else:
+            self.owner_id = value

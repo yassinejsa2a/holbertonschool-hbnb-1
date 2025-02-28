@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
-from flask import request, jsonify
+#from flask import request, jsonify
 
 api = Namespace('places', description='Place operations')
 
@@ -95,6 +95,28 @@ class PlaceResource(Resource):
         """Get place details by ID"""
         place = facade.get_place(place_id)
         if place:
+            amenities_list = []
+            for amenity_id in place.amenities:
+                # Handle different amenity formats (could be string ID or dict)
+                if isinstance(amenity_id, dict) and 'id' in amenity_id:
+                    amenity_obj = facade.get_amenity(amenity_id['id'])
+                else:
+                    amenity_obj = facade.get_amenity(amenity_id)
+                
+                if amenity_obj:
+                    amenities_list.append({
+                        'id': amenity_obj.id,
+                        'name': amenity_obj.name
+                    })
+            
+            owner = place.owner
+            owner_data = {
+                'id': owner.id,
+                'first_name': owner.first_name,
+                'last_name': owner.last_name,
+                'email': owner.email
+            } if owner else None
+            
             return {
                 'id': place.id,
                 'title': place.title,
@@ -102,20 +124,9 @@ class PlaceResource(Resource):
                 'price': place.price,
                 'latitude': place.latitude,
                 'longitude': place.longitude,
-                'owner': {
-                    'id': place.owner.id,
-                    'first_name': place.owner.first_name,
-                    'last_name': place.owner.last_name,
-                    'email': place.owner.email
-                    },
-                'amenities': [
-                    {
-                        'id': facade.get_place(place_id).id,
-                        'name': facade.get_amenity(amenity['id']).name
-                    }
-                    for amenity in place.amenities
-                    ]
-                    }, 200
+                'owner': owner_data,
+                'amenities': amenities_list
+            }, 200
         return {'error': 'Place not found'}, 404
 
     @api.expect(place_model)
