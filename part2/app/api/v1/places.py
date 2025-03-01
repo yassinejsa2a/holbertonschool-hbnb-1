@@ -36,9 +36,11 @@ place_model = api.model('Place', {
 
 @api.route('/')
 class PlaceList(Resource):
-    @api.expect(place_model)
+    @api.expect(place_model, validate=True)
     @api.response(201, 'Place successfully created')
+    @api.response(400, 'Title already registered')
     @api.response(400, 'Invalid input data')
+    @api.response(404, 'Owner not found')
     def post(self):
         """Register a new place"""
         place_data = api.payload
@@ -94,59 +96,61 @@ class PlaceResource(Resource):
     def get(self, place_id):
         """Get place details by ID"""
         place = facade.get_place(place_id)
-        if place:
-            return {
-                'id': place.id,
-                'title': place.title,
-                'description': place.description,
-                'price': place.price,
-                'latitude': place.latitude,
-                'longitude': place.longitude,
-                'owner': {
-                    'id': place.owner.id,
-                    'first_name': place.owner.first_name,
-                    'last_name': place.owner.last_name,
-                    'email': place.owner.email
-                    },
-                'amenities': [
-                    {
-                        'id': facade.get_place(place_id).id,
-                        'name': facade.get_amenity(amenity['id']).name
-                    }
-                    for amenity in place.amenities
-                    ]
-                    }, 200
-        return {'error': 'Place not found'}, 404
+        if not place:
+            return {'error': 'Place not found'}, 404
+        
+        owner = facade.get_user(place.owner_id)
+        owner_data = {
+            'id': owner.id,
+            'first_name': owner.first_name,
+            'last_name': owner.last_name,
+            'email': owner.email
+        } if owner else None
 
-    @api.expect(place_model)
+        amenity_data = []
+        for amenity_id in place.amenities:
+            amenity = facade.get_amenity(amenity_id)
+            if amenity:
+                amenity_data.append({
+                    'id': amenity.id,
+                    'name': amenity.name
+                })
+
+        return {
+            'id': place.id,
+            'title': place.title,
+            'description': place.description,
+            'price': place.price,
+            'latitude': place.latitude,
+            'longitude': place.longitude,
+            'owner': owner_data,
+            'amenities': amenity_data
+        }, 200
+
+    @api.expect(place_model, validate=True)
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
-        """Update a place's information"""
-        place_data = api.payload
-
+        """Update place details"""
         place = facade.get_place(place_id)
-        if place is None:
+        if not place:
             return {'error': 'Place not found'}, 404
 
-        user = facade.get_user(place_data.get('owner_id'))
-        if user is None:
-            return {'error': 'Invalid owner_id'}, 400
-        
-        place_data['owner'] = user
-        del place_data['owner_id']
-
-        if place_data == facade.get_place(place_id):
-            return {'error': 'No changes detected'}, 400
-
-        if place_data.get('amenities'):
-            for amenity in place_data['amenities']:
-                if facade.get_amenity(amenity['id']) is None:
-                    return {'error': f'Invalid amenity ID: {amenity["id"]}'}, 400
+        update_data = api.payload
 
         try:
-            facade.update_place(place_id, place_data)
-            return {'message': 'Place updated successfully'}, 200
+            facade.update_place(place_id, update_data)
+            updated_place = facade.get_place(place_id)  # Get updated place
+            return {
+                'id': updated_place.id,
+                'title': updated_place.title,
+                'description': updated_place.description,
+                'price': updated_place.price,
+                'latitude': updated_place.latitude,
+                'longitude': updated_place.longitude,
+                'owner_id': updated_place.owner_id,
+                'amenities': updated_place.amenities
+            }, 200
         except ValueError as e:
             return {'error': str(e)}, 400

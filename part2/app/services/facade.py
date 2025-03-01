@@ -47,7 +47,10 @@ class HBnBFacade:
         return self.place_repo.get_all()
 
     def get_place_by_title(self, title):
-        return self.place_repo.get_by_attribute('title', title)
+        return next(
+            (place for place in self.place_repo.get_all() if place.title == title),
+            None
+        )
 
     def update_place(self, place_id, place_data):
         self.place_repo.update(place_id, place_data)
