@@ -90,3 +90,6 @@ class HBnBFacade:
 
     def update_review(self, review_id, review_data):
         self.review_repo.update(review_id, review_data)
+
+    def delete_review(self, review_id):
+        return self.review_repo.delete(review_id)
