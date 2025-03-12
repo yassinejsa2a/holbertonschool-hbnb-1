@@ -3,6 +3,7 @@ from app.services import facade
 from flask import request, jsonify
 from app.models.user import User
 import bcrypt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('users', description='User operations')
 
@@ -57,36 +58,41 @@ class UserResource(Resource):
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
 
 
-    @api.expect(user_model, validate=True)
+    @api.expect(api.model('UserUpdate', {
+        'first_name': fields.String(description='First name of the user', min_length=1, max_length=50),
+        'last_name': fields.String(description='Last name of the user', min_length=1, max_length=50)
+    }), validate=True)
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Unauthorized operation')
     @api.response(404, 'User not found')
+    @jwt_required()
     def put(self, user_id):
-        """Update an existing user"""
+        """Update user's own first name and last name"""
         user_data = api.payload
         user = facade.get_user(user_id)
+        current_user = get_jwt_identity()
 
         if not user:
             return {'error': 'User not found'}, 404
+        
+        if user.id != current_user:
+            return {'error': 'Unauthorized operation'}, 403
 
         if (
             user.first_name == user_data.get('first_name', user.first_name) and
-            user.last_name == user_data.get('last_name', user.last_name) and
-            user.email == user_data.get('email', user.email)
+            user.last_name == user_data.get('last_name', user.last_name)
         ):
             return {'error': 'No changes detected'}, 400
-
-        if user_data.get('email') and user_data.get('email') != user.email:
-            existing_user = facade.get_user_by_email(user_data['email'])
-            if existing_user and existing_user.id != user.id:
-                return {'error': 'Email already registered'}, 400
 
         try:
             user.first_name = user_data.get('first_name', user.first_name)
             user.last_name = user_data.get('last_name', user.last_name)
-            user.email = user_data.get('email', user.email)
 
-            facade.update_user(user.id, user_data)
+            facade.update_user(user.id, {
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            })
         except Exception as e:
             return {'error': str(e)}, 400
 

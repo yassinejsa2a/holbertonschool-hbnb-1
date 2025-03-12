@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from flask import request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('places', description='Place operations')
 
@@ -41,9 +42,28 @@ class PlaceList(Resource):
     @api.response(400, 'Title already registered')
     @api.response(400, 'Invalid input data')
     @api.response(404, 'Owner not found')
+    @jwt_required()
     def post(self):
         """Register a new place"""
         place_data = api.payload
+        current_user_id = get_jwt_identity()
+        
+        # Check if the user ID is a dictionary and extract the ID
+        if isinstance(current_user_id, dict) and 'id' in current_user_id:
+            current_user_id = current_user_id['id']
+        elif isinstance(current_user_id, dict):
+            # Try to find the user ID in the dictionary
+            for key in ['id', 'user_id', '_id', 'sub']:
+                if key in current_user_id:
+                    current_user_id = current_user_id[key]
+                    break
+            else:
+                return {'error': 'Could not determine user ID from token'}, 400
+                
+        place_data['owner_id'] = current_user_id
+
+        if current_user_id != place_data['owner_id']:
+            return {'error': 'Unauthorized operation'}, 403
 
         try:
             owner = facade.get_user(place_data['owner_id'])
@@ -131,11 +151,30 @@ class PlaceResource(Resource):
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Unauthorized operation')
+    @jwt_required()
     def put(self, place_id):
         """Update place details"""
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
+        current_user_id = get_jwt_identity()
+        
+        # Check if the user ID is a dictionary and extract the ID
+        if isinstance(current_user_id, dict) and 'id' in current_user_id:
+            current_user_id = current_user_id['id']
+        elif isinstance(current_user_id, dict):
+            # Try to find the user ID in the dictionary
+            for key in ['id', 'user_id', '_id', 'sub']:
+                if key in current_user_id:
+                    current_user_id = current_user_id[key]
+                    break
+            else:
+                return {'error': 'Could not determine user ID from token'}, 400
+        
+        # Check if current user is the owner
+        if current_user_id != place.owner_id:
+            return {'error': 'Unauthorized operation'}, 403
 
         update_data = api.payload
 
