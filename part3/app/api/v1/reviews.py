@@ -2,7 +2,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
 api = Namespace('reviews', description='Review operations')
 
 # Define the review model for input validation and documentation
@@ -57,13 +56,13 @@ class ReviewList(Resource):
                 
             # Check if user owns the place
             if place.owner_id == current_user_id:
-                return {'error': 'You cannot review your own place'}, 403
+                return {'error': 'You cannot review your own place'}, 400
                 
             # Check if user has already reviewed this place
             existing_reviews = facade.get_reviews_by_place(review_data['place_id'])
             for review in existing_reviews:
                 if review.user_id == current_user_id:
-                    return {'error': 'You have already reviewed this place'}, 403
+                    return {'error': 'You have already reviewed this place'}, 400
                     
             # Validate rating range
             if not isinstance(review_data['rating'], int) or not (1 <= review_data['rating'] <= 5):
@@ -155,7 +154,7 @@ class ReviewResource(Resource):
             # Check if user is authorized to update this review
             current_user_id = get_jwt_identity()
             if current_user_id != review.user_id:
-                return {"error": "You can only modify reviews you created"}, 403
+                return {"error": "Unauthorized action."}, 403
 
             update_data = api.payload
 
@@ -195,13 +194,13 @@ class ReviewResource(Resource):
     def delete(self, review_id):
         """Delete a review"""
         review = facade.get_review(review_id)
-        current_user_id = get_jwt_identity()
-
-        if current_user_id != review.user_id:
-            return {"error": "You can only delete reviews you created"}, 403
-
         if not review:
             return {"error": "Review not found"}, 404
+            
+        current_user_id = get_jwt_identity()
+        if current_user_id != review.user_id:
+            return {"error": "Unauthorized action."}, 403
+
         facade.delete_review(review_id)
         return {"message" : "Review deleted successfully"}, 204
 
@@ -274,6 +273,3 @@ class UserReviewList(Resource):
             })
 
         return result, 200
-
-
-
