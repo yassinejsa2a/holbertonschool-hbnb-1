@@ -2,7 +2,6 @@ from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
 api = Namespace('places', description='Place operations')
 
 # Define the models for related entities
@@ -63,7 +62,7 @@ class PlaceList(Resource):
         place_data['owner_id'] = current_user_id
 
         if current_user_id != place_data['owner_id']:
-            return {'error': 'Unauthorized operation'}, 403
+            return {'error': 'Unauthorized action'}, 403
 
         try:
             owner = facade.get_user(place_data['owner_id'])
@@ -151,7 +150,7 @@ class PlaceResource(Resource):
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
-    @api.response(403, 'Unauthorized operation')
+    @api.response(403, 'Unauthorized action')
     @jwt_required()
     def put(self, place_id):
         """Update place details"""
@@ -174,7 +173,7 @@ class PlaceResource(Resource):
         
         # Check if current user is the owner
         if current_user_id != place.owner_id:
-            return {'error': 'Unauthorized operation'}, 403
+            return {'error': 'Unauthorized action'}, 403
 
         update_data = api.payload
 
