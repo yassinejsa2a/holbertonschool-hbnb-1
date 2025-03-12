@@ -4,7 +4,6 @@ from flask import request, jsonify
 from app.models.user import User
 import bcrypt
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
 api = Namespace('users', description='User operations')
 
 # Define the user model for input validation and documentation
@@ -13,7 +12,6 @@ user_model = api.model('User', {
     'last_name': fields.String(required=True, description='Last name of the user', min_length=1, max_length=50),
     'email': fields.String(required=True, description='Email of the user'),
     'password': fields.String(required=True, description='Password of the user')
-
 })
 
 @api.route('/')
@@ -25,8 +23,6 @@ class UserList(Resource):
         if not users:
             return {'error': 'No users found'}, 404
         return {'users': [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email} for user in users]}, 200
-
-
 
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created')
@@ -40,7 +36,6 @@ class UserList(Resource):
         if existing_user:
             return {'error': 'Email already registered'}, 400
         
-
         new_user = facade.create_user(user_data)
         hashed_password = new_user.hash_password(user_data['password'])
         user_data['password'] = hashed_password
@@ -56,7 +51,6 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
-
 
     @api.expect(api.model('UserUpdate', {
         'first_name': fields.String(description='First name of the user', min_length=1, max_length=50),
@@ -77,7 +71,11 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
         
         if user.id != current_user:
-            return {'error': 'Unauthorized operation'}, 403
+            return {'error': 'Unauthorized action.'}, 403
+
+        # Check if user is trying to modify email or password
+        if 'email' in user_data or 'password' in user_data:
+            return {'error': 'You cannot modify email or password.'}, 400
 
         if (
             user.first_name == user_data.get('first_name', user.first_name) and
