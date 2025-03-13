@@ -3,7 +3,7 @@ from app.services import facade
 from flask import request, jsonify
 from app.models.user import User
 import bcrypt
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 api = Namespace('users', description='User operations')
 
 # Define the user model for input validation and documentation
