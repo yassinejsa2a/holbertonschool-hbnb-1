@@ -4,7 +4,6 @@ from app import db
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
-
 class Amenity(BaseModel):
     """
     Represents an amenity that can be associated with a place.
