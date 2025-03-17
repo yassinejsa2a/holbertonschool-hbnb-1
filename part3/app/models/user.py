@@ -11,6 +11,9 @@ class User(BaseModel):
         self.email = email
         self.is_admin = is_admin
         self.password = password
+        places = db.relationship('Place',
+                             back_populates='owner',
+                             cascade='all, delete-orphan')
 
     def add_place(self, place):
         """Add a place to the user"""
@@ -22,7 +25,7 @@ class User(BaseModel):
         self.reviews.append(review)
 
 
-    @property
+    @hybrid_property
     def first_name(self):
         """
         Get the user's first name.
@@ -40,7 +43,7 @@ class User(BaseModel):
                 )
         self.__first_name = value
 
-    @property
+    @hybrid_property
     def last_name(self):
         """
         Get the user's last name.
@@ -58,7 +61,7 @@ class User(BaseModel):
                 )
         self.__last_name = value
 
-    @property
+    @hybrid_property
     def email(self):
         """
         Get the user's email.
@@ -74,7 +77,7 @@ class User(BaseModel):
             raise ValueError("Valid email is required")
         self.__email = value
 
-    @property
+    @hybrid_property
     def is_admin(self):
         """
         Get the user's admin status.

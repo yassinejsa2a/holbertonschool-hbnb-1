@@ -1,4 +1,6 @@
-from app.models.base import BaseModel
+from app.models.base import BaseModel, User, Place
+from app import db
+import uuid
 
 class Review(BaseModel):
     """
@@ -10,13 +12,19 @@ class Review(BaseModel):
         Initialize a new review.
         
         """
-        super().__init__()
-        self.text = text
-        self.rating = rating
-        self.place_id = place_id
-        self.user_id = user_id
+        __tablename__ = 'reviews'
+        text = db.Column(db.String(50), nullable=False)
+        rating = db.Column(db.Integer, nullable=False)
+        place_id = db.Column(db.String(36),
+                          db.ForeignKey('places.id'),
+                          nullable=False)
+        user_id = db.Column(db.String(36),
+                         db.ForeignKey('users.id'),
+                         nullable=False)
+        user = db.relationship('User', back_populates='reviews')
+        place = db.relationship('Place', back_populates='reviews')
     
-    @property
+    @hybrid_property
     def text(self):
         """
         Get the review text.
@@ -34,7 +42,7 @@ class Review(BaseModel):
             raise ValueError("Review text must be a string")
         self.__text = value
     
-    @property
+    @hybrid_property
     def rating(self):
         """
         Get the rating of the review.
@@ -52,7 +60,7 @@ class Review(BaseModel):
             raise ValueError("Rating must be between 1 and 5")
         self.__rating = value
     
-    @property
+    @hybrid_property
     def place_id(self):
         """
         Get the place ID being reviewed.
@@ -68,7 +76,7 @@ class Review(BaseModel):
             raise ValueError("Place ID must be a string")
         self.__place_id = value
     
-    @property
+    @hybrid_property
     def user_id(self):
         """
         Get the user ID who wrote the review.
