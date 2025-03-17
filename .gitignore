@@ -45,3 +45,4 @@ part3/app/persistence/__pycache__/*.pyc
 part3/app/api/v1/__pycache__/*.pyc
 part3/app/models/__pycache__/*.pyc
 part3/__pycache__/*.pyc
+part3/instance/development.db

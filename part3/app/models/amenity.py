@@ -5,7 +5,6 @@ from app.models.place import place_amenity
 import uuid
 
 
-
 class Amenity(BaseModel):
     """
     Represents an amenity that can be associated with a place.
