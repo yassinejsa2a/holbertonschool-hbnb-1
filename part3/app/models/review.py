@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
 import uuid
 
-class Review(db.Model, BaseModel):
+class Review(BaseModel):
     """
     Represents a review for a place.
     """

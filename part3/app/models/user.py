@@ -17,6 +17,8 @@ class User(BaseModel):
     places = db.relationship('Place',
                              back_populates='owner',
                              cascade='all, delete-orphan')
+    reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
+
 
     def hash_password(self, password):
         """Hash the password before storing it."""
