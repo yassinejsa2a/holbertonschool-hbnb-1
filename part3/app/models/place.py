@@ -2,11 +2,13 @@ from app.models.base import BaseModel
 from app.models.user import User
 from app import db
 import uuid
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 place_amenity = db.Table('place_amenity',
     Column('place_id', Integer, ForeignKey('places.id'), primary_key=True),
-    Column('amenity_id', Integer, ForeignKey('amenitys.id'), primary_key=True)
+    Column('amenity_id', Integer, ForeignKey('amenities.id'), primary_key=True)
 )
 
 class Place(BaseModel):
@@ -19,6 +21,10 @@ class Place(BaseModel):
     owner_id = db.Column(Integer, ForeignKey('users.id'), nullable=False)
     amenities = db.relationship('Amenity', secondary=place_amenity,
                            back_populates='places', cascade='all, delete')
+    owner = db.relationship('User', back_populates='places')
+    reviews = db.relationship('Review', back_populates='place', cascade='all, delete-orphan')
+
+
 
     def add_review(self, review):
         """Add a review to the place."""

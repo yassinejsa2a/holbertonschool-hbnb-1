@@ -1,6 +1,7 @@
 from app.models.base import BaseModel
 from flask_bcrypt import Bcrypt
 from app import db, bcrypt
+from sqlalchemy.ext.hybrid import hybrid_property
 import uuid
 
 bcrypt = Bcrypt()
@@ -16,6 +17,8 @@ class User(BaseModel):
     places = db.relationship('Place',
                              back_populates='owner',
                              cascade='all, delete-orphan')
+    reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
+
 
     def hash_password(self, password):
         """Hash the password before storing it."""

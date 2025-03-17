@@ -1,6 +1,8 @@
 from app.models.base import BaseModel
 import uuid
 from app import db
+from sqlalchemy.ext.hybrid import hybrid_property
+
 
 
 class Amenity(BaseModel):
@@ -8,7 +10,7 @@ class Amenity(BaseModel):
     Represents an amenity that can be associated with a place.
     """
 
-    __tablename__ = 'places'
+    __tablename__ = 'amenities'
     name = db.Column(db.String(50), nullable=False)
     places = db.relationship(
         'Place',
