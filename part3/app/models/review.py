@@ -1,28 +1,35 @@
-from app.models.base import BaseModel, User, Place
+from app.models.base import BaseModel
+from app.models.user import User
+from app.models.place import Place
+from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
 import uuid
 
-class Review(BaseModel):
+class Review(db.Model, BaseModel):
     """
     Represents a review for a place.
     """
+    __tablename__ = 'reviews'
+    
+    text = db.Column(db.String(50), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    place_id = db.Column(db.String(36),
+                         db.ForeignKey('places.id'),
+                         nullable=False)
+    user_id = db.Column(db.String(36),
+                        db.ForeignKey('users.id'),
+                        nullable=False)
+    user = db.relationship('User', back_populates='reviews')
+    place = db.relationship('Place', back_populates='reviews')
     
     def __init__(self, text, rating, place_id, user_id):
         """
         Initialize a new review.
-        
         """
-        __tablename__ = 'reviews'
-        text = db.Column(db.String(50), nullable=False)
-        rating = db.Column(db.Integer, nullable=False)
-        place_id = db.Column(db.String(36),
-                          db.ForeignKey('places.id'),
-                          nullable=False)
-        user_id = db.Column(db.String(36),
-                         db.ForeignKey('users.id'),
-                         nullable=False)
-        user = db.relationship('User', back_populates='reviews')
-        place = db.relationship('Place', back_populates='reviews')
+        self.text = text
+        self.rating = rating
+        self.place_id = place_id
+        self.user_id = user_id
     
     @hybrid_property
     def text(self):
@@ -87,7 +94,6 @@ class Review(BaseModel):
     def user_id(self, value):
         """
         Set the user ID who wrote the review.
-        
         """
         if not isinstance(value, str):
             raise ValueError("User ID must be a string")

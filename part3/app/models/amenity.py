@@ -1,6 +1,8 @@
 from app.models.base import BaseModel
 import uuid
 from app import db
+from sqlalchemy.ext.hybrid import hybrid_property
+
 
 
 class Amenity(BaseModel):

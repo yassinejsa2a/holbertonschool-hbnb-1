@@ -1,6 +1,7 @@
 from app.models.base import BaseModel
 from flask_bcrypt import Bcrypt
 from app import db, bcrypt
+from sqlalchemy.ext.hybrid import hybrid_property
 import uuid
 
 bcrypt = Bcrypt()

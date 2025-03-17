@@ -2,6 +2,8 @@ from app.models.base import BaseModel
 from app.models.user import User
 from app import db
 import uuid
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 place_amenity = db.Table('place_amenity',
