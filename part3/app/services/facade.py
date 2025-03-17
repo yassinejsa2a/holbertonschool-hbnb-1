@@ -1,19 +1,16 @@
-from app.persistence.repository import PlaceRepository, ReviewRepository, AmenityRepository, UserRepository
+from app.persistence.repository import SQLAlchemyRepository, UserRepository, AmenityRepository, PlaceRepository, ReviewRepository
 from app.models.user import User
+from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
-from app.models.amenity import Amenity
-from app.persistence.repository import UserRepository
-from app.persistence.repository import PlaceRepository
-from app.persistence.repository import ReviewRepository
-from app.persistence.repository import AmenityRepository
+from app import db
 
 class HBnBFacade:
     def __init__(self):
         self.user_repo = UserRepository()
+        self.amenity_repo = AmenityRepository()
         self.place_repo = PlaceRepository()
         self.review_repo = ReviewRepository()
-        self.amenity_repo = AmenityRepository()
 
     # User
     def create_user(self, user_data):

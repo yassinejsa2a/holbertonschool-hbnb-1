@@ -4,23 +4,47 @@ from app.models.base import BaseModel
 
 place_amenity = db.Table(
     'place_amenity',
-    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
-    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
+    db.Column(
+        'place_id',
+        db.String(36),
+        db.ForeignKey('places.id'),
+        primary_key=True
+    ),
+    db.Column(
+        'amenity_id',
+        db.String(36),
+        db.ForeignKey('amenities.id'),
+        primary_key=True
+    )
 )
 
+
 class Place(BaseModel):
+    """
+    Class representing a place.
+    """
+
     __tablename__ = 'places'
-    
-    _title = db.Column(db.String(50), nullable=False)
-    _description = db.Column(db.String(50), nullable=False)
-    _price = db.Column(db.Float, nullable=False)
+
+    _title = db.Column(db.String(255), nullable=False)
+    _description = db.Column(db.Text, nullable=True)
+    _price = db.Column(db.Numeric(10, 2), nullable=False)
     _latitude = db.Column(db.Float, nullable=False)
     _longitude = db.Column(db.Float, nullable=False)
-    _owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
-
+    _owner_id = db.Column(db.String(36),
+                          db.ForeignKey('users.id'),
+                          nullable=False)
     owner = db.relationship('User', back_populates='places')
-    reviews = db.relationship('Review', back_populates='place', cascade='all, delete-orphan')
-    amenities = db.relationship('Amenity', secondary=place_amenity, back_populates='places', cascade='all, delete')
+    reviews = db.relationship('Review',
+                              back_populates='place',
+                              cascade='all, delete-orphan')
+    amenities = db.relationship(
+        'Amenity',
+        secondary=place_amenity,
+        back_populates='places',
+        cascade='all, delete'
+    )
+
 
     @property
     def title(self):

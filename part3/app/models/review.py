@@ -7,7 +7,7 @@ class Review(BaseModel):
     """
     __tablename__ = 'reviews'
     
-    _text = db.Column(db.String(50), nullable=False)
+    _text = db.Column(db.Text, nullable=False)
     _rating = db.Column(db.Integer, nullable=False)
     _place_id = db.Column(db.String(36),
                          db.ForeignKey('places.id'),
@@ -18,14 +18,6 @@ class Review(BaseModel):
     user = db.relationship('User', back_populates='reviews')
     place = db.relationship('Place', back_populates='reviews')
     
-    def __init__(self, text, rating, place_id, user_id):
-        """
-        Initialize a new review.
-        """
-        self.text = text
-        self.rating = rating
-        self.place_id = place_id
-        self.user_id = user_id
     
     @property
     def text(self):

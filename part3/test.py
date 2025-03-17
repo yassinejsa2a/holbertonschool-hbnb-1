@@ -7,6 +7,8 @@ import uuid
 from run import app
 from flask_jwt_extended import create_access_token
 from app.models.user import User
+from app.models.place import Place
+from app.models.amenity import Amenity
 from app import db
 
 

@@ -1,17 +1,16 @@
 from app import db
 from app.models.base import BaseModel
-from app.models.place import place_amenity
-
-import uuid
 
 
 class Amenity(BaseModel):
     """
-    Represents an amenity that can be associated with a place.
+    Class representing an amenity.
     """
 
     __tablename__ = 'amenities'
-    _name = db.Column(db.String(50), nullable=False)
+
+    _name = db.Column(db.String(128), nullable=False, unique=True)
+
     places = db.relationship(
         'Place',
         secondary='place_amenity',
@@ -23,7 +22,7 @@ class Amenity(BaseModel):
         """
         Get the amenity's name.
         """
-        return self.__name
+        return self._name
 
     @name.setter
     def name(self, value):
