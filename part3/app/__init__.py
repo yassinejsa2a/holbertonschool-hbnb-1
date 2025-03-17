@@ -18,6 +18,9 @@ from app.api.v1.auth import api as auth_ns
 def create_app(config_class="config.DevelopmentConfig"):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hbnb.db'  # Adaptez selon votre configuration
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = 'votre-clé-secrète-jwt'  # À remplacer par une vraie clé secrète
     api = Api(app, version="1.0", title="HBnB API", description="HBnB Application API",
               security="Bearer", authorizations={
                   "Bearer": {
@@ -38,5 +41,9 @@ def create_app(config_class="config.DevelopmentConfig"):
 
     bcrypt.init_app(app)
     jwt.init_app(app)
+
+    with app.app_context():
+        from app.models import user, place, review, amenity, base
+        db.create_all()
     return app
 

@@ -1,130 +1,41 @@
 from app.models.base import BaseModel
-from app.models.user import User
 from app import db
-import uuid
-from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
+import uuid
 
-
+# Association table for many-to-many relationship between Place and Amenity
 place_amenity = db.Table('place_amenity',
-    Column('place_id', Integer, ForeignKey('places.id'), primary_key=True),
-    Column('amenity_id', Integer, ForeignKey('amenities.id'), primary_key=True)
+    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
+    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
 )
 
 class Place(BaseModel):
+    """
+    Represents a place or accommodation.
+    """
     __tablename__ = 'places'
-    title = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.String(50), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    latitude = db.Column(db.Numeric(precision=10, scale=1), nullable=False)
-    longitude = db.Column(db.Numeric(precision=10, scale=1), nullable=False)
-    owner_id = db.Column(Integer, ForeignKey('users.id'), nullable=False)
-    amenities = db.relationship('Amenity', secondary=place_amenity,
-                           back_populates='places', cascade='all, delete')
+    
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    
+    # Foreign key to User model
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
+    
+    # Relationships
     owner = db.relationship('User', back_populates='places')
     reviews = db.relationship('Review', back_populates='place', cascade='all, delete-orphan')
-
-
-
-    def add_review(self, review):
-        """Add a review to the place."""
-        self.reviews.append(review)
-
-    def add_amenity(self, amenity):
-        """Add an amenity to the place."""
-        self.amenities.append(amenity)
-
-    @hybrid_property
-    def title(self):
+    amenities = db.relationship('Amenity', secondary=place_amenity, back_populates='places')
+    
+    def __init__(self, title, description, price, latitude=None, longitude=None, owner_id=None):
         """
-        Get the place's title.
+        Initialize a new place.
         """
-        return self.__title
-
-    @title.setter
-    def title(self, value):
-        """
-        Set the place's title.
-        """
-        self.__title = value
-
-    @hybrid_property
-    def description(self):
-        """
-        Get the place's description.
-        """
-        return self.__description
-
-    @description.setter
-    def description(self, value):
-        """
-        Set the place's description.
-        """
-        self.__description = value
-
-    @hybrid_property
-    def price(self):
-        """
-        Get the place's price.
-        """
-        return self.__price
-
-    @price.setter
-    def price(self, value):
-        """
-        Set the place's price.
-        """
-        if value < 0:
-            raise ValueError("price must be >= 0")
-        self.__price = value
-
-    @hybrid_property
-    def latitude(self):
-        """
-        Get the place's latitude.
-        """
-        return self.__latitude
-
-    @latitude.setter
-    def latitude(self, value):
-        """
-        Set the place's latitude.
-        """
-        if not isinstance(value, (int, float)):
-            raise ValueError('latitude must be a number')
-        if value < -90.0 or value > 90.0:
-            raise ValueError('latitude must be between -90 and 90')
-        self.__latitude = value
-
-
-    @hybrid_property
-    def longitude(self):
-        """
-        Get the place longitude.
-        """
-        return self.__longitude
-
-    @longitude.setter
-    def longitude(self, value):
-        """
-        Set the place longitude.
-        """
-        if not isinstance(value, (int, float)):
-            raise ValueError("longitude must be a number")
-        if value < -180.0 or value > 180.0:
-            raise ValueError('longitude must be between -180 and 180')
-        self.__longitude = value
-
-    @hybrid_property
-    def owner(self):
-        """
-        Get the place owner.
-        """
-        return self.__owner_id
-
-    @owner.setter
-    def owner(self, value):
-        """
-        Set the place owner.
-        """
-        self.__owner_id = value
+        self.title = title
+        self.description = description
+        self.price = price
+        self.latitude = latitude
+        self.longitude = longitude
+        self.owner_id = owner_id

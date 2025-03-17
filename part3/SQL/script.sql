@@ -26,8 +26,9 @@ CREATE TABLE review (
     text TEXT,
     rating INT CHECK (rating BETWEEN 1 AND 5),
     user_id CHAR(36),
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
     place_id CHAR(36),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    
     FOREIGN KEY (place_id) REFERENCES place(id) ON DELETE CASCADE,
     UNIQUE (user_id, place_id)
 );
@@ -38,17 +39,18 @@ CREATE TABLE amenity (
     name VARCHAR(255) UNIQUE
 );
 
--- Create place_amenity table
+-- Create place_amenity table (corrigée)
 CREATE TABLE place_amenity (
-    place_id CHAR(36) PRIMARY KEY,
+    place_id CHAR(36),
+    amenity_id CHAR(36),
+    PRIMARY KEY (place_id, amenity_id),
     FOREIGN KEY (place_id) REFERENCES place(id) ON DELETE CASCADE,
-    amenity_id CHAR(36) PRIMARY KEY,
     FOREIGN KEY (amenity_id) REFERENCES amenity(id) ON DELETE CASCADE
 );
 
--- Insert values for admin user
+-- Insert values for admin user (corrigée)
 INSERT INTO user (id, email, first_name, last_name, password, is_admin)
-VALUES ('36c9050e-ddd3-4c3b-9731-9f487208bbc1', 'admin@hbnb.io', 'Admin', 'HBnB', '$2a$12$NlGI.VPRaWrTnR/1NcX0XuOnoa4f8jIrqW26cG0perXVH21HTpqnC', TRUE)
+VALUES ('36c9050e-ddd3-4c3b-9731-9f487208bbc1', 'admin@hbnb.io', 'Admin', 'HBnB', '$2a$12$NlGI.VPRaWrTnR/1NcX0XuOnoa4f8jIrqW26cG0perXVH21HTpqnC', TRUE);
 
 -- insert values for amenities
 INSERT INTO amenity (id, name)
@@ -75,7 +77,7 @@ UPDATE review
 SET rating = 5
 WHERE id = 'bdf0e51c-f2e1-4251-ac54-e63d2fa67c9e';
 
--- 
+--
 
 
 

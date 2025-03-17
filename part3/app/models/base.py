@@ -2,17 +2,23 @@ import uuid
 from datetime import datetime
 from app import db
 
-class BaseModel:
-    __abstract__ = True  # This ensures SQLAlchemy does not create a table for BaseModel
+class BaseModel(db.Model):
+    """Base model class for all models to inherit from."""
+    __abstract__ = True
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    def __init__(self, *args, **kwargs):
+        """Initialize a new base model."""
+        super().__init__(*args, **kwargs)
+        if not self.id:
+            self.id = str(uuid.uuid4())
+
     def save(self):
         """Update the updated_at timestamp whenever the object is modified"""
-        self.updated_at = datetime.now()
-        db.session.commit()
+        self.updated_at = datetime.utcnow()
 
     def update(self, data):
         """Update the attributes of the object based on the provided dictionary"""
