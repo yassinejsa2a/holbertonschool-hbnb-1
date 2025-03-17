@@ -1,7 +1,8 @@
-from app.models.base import BaseModel
-import uuid
 from app import db
-from sqlalchemy.ext.hybrid import hybrid_property
+from app.models.base import BaseModel
+from app.models.place import place_amenity
+
+import uuid
 
 
 
@@ -11,14 +12,14 @@ class Amenity(BaseModel):
     """
 
     __tablename__ = 'amenities'
-    name = db.Column(db.String(50), nullable=False)
+    _name = db.Column(db.String(50), nullable=False)
     places = db.relationship(
         'Place',
         secondary='place_amenity',
         back_populates='amenities'
     )
 
-    @hybrid_property
+    @property
     def name(self):
         """
         Get the amenity's name.
@@ -32,4 +33,4 @@ class Amenity(BaseModel):
         """
         if not value or len(value) > 50:
             raise ValueError("Name must be provided and be at most 50 characters long.")
-        self.__name = value
+        self._name = value

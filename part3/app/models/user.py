@@ -1,19 +1,17 @@
 from app.models.base import BaseModel
 from flask_bcrypt import Bcrypt
 from app import db, bcrypt
-from sqlalchemy.ext.hybrid import hybrid_property
-import uuid
 
 bcrypt = Bcrypt()
 
 class User(BaseModel):
     __tablename__ = 'users'
 
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), nullable=False, unique=True)
-    password = db.Column(db.String(128), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+    _first_name = db.Column(db.String(50), nullable=False)
+    _last_name = db.Column(db.String(50), nullable=False)
+    _email = db.Column(db.String(120), nullable=False, unique=True)
+    _password = db.Column(db.String(128), nullable=False)
+    _is_admin = db.Column(db.Boolean, default=False)
     places = db.relationship('Place',
                              back_populates='owner',
                              cascade='all, delete-orphan')
@@ -28,22 +26,12 @@ class User(BaseModel):
         """Verify the hashed password."""
         return bcrypt.check_password_hash(self.password, password)
 
-    def add_place(self, place):
-        """Add a place to the user"""
-        self.places.append(place)
-
-
-    def add_review(self, review):
-        """Add a review to the user"""
-        self.reviews.append(review)
-
-
-    @hybrid_property
+    @property
     def first_name(self):
         """
         Get the user's first name.
         """
-        return self.__first_name
+        return self._first_name
 
     @first_name.setter
     def first_name(self, value):
@@ -54,14 +42,14 @@ class User(BaseModel):
             raise ValueError(
                 'The first name must be indicated and must be less than 50 characters long.'
                 )
-        self.__first_name = value
+        self._first_name = value
 
-    @hybrid_property
+    @property
     def last_name(self):
         """
         Get the user's last name.
         """
-        return self.__last_name
+        return self._last_name
 
     @last_name.setter
     def last_name(self, value):
@@ -72,14 +60,14 @@ class User(BaseModel):
             raise ValueError(
                 'The last name must be indicated and must be less than 50 characters long.'
                 )
-        self.__last_name = value
+        self._last_name = value
 
-    @hybrid_property
+    @property
     def email(self):
         """
         Get the user's email.
         """
-        return self.__email
+        return self._email
 
     @email.setter
     def email(self, value):
@@ -88,14 +76,14 @@ class User(BaseModel):
         """
         if not isinstance(value, str) or '@' not in value:
             raise ValueError("Valid email is required")
-        self.__email = value
+        self._email = value
 
-    @hybrid_property
+    @property
     def is_admin(self):
         """
         Get the user's admin status.
         """
-        return self.__is_admin
+        return self._is_admin
 
     @is_admin.setter
     def is_admin(self, value):
@@ -104,7 +92,7 @@ class User(BaseModel):
         """
         if not isinstance(value, bool):
             raise ValueError('is_admin must be a boolean')
-        self.__is_admin = value
+        self._is_admin = value
 
     def hash_password(self, password):
         """Hashes the password before storing it."""

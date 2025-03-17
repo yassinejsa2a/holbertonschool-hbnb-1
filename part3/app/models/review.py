@@ -1,9 +1,5 @@
-from app.models.base import BaseModel
-from app.models.user import User
-from app.models.place import Place
-from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
-import uuid
+from app.models.base import BaseModel
 
 class Review(BaseModel):
     """
@@ -11,12 +7,12 @@ class Review(BaseModel):
     """
     __tablename__ = 'reviews'
     
-    text = db.Column(db.String(50), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    place_id = db.Column(db.String(36),
+    _text = db.Column(db.String(50), nullable=False)
+    _rating = db.Column(db.Integer, nullable=False)
+    _place_id = db.Column(db.String(36),
                          db.ForeignKey('places.id'),
                          nullable=False)
-    user_id = db.Column(db.String(36),
+    _user_id = db.Column(db.String(36),
                         db.ForeignKey('users.id'),
                         nullable=False)
     user = db.relationship('User', back_populates='reviews')
@@ -31,12 +27,12 @@ class Review(BaseModel):
         self.place_id = place_id
         self.user_id = user_id
     
-    @hybrid_property
+    @property
     def text(self):
         """
         Get the review text.
         """
-        return self.__text
+        return self._text
     
     @text.setter
     def text(self, value):
@@ -47,14 +43,14 @@ class Review(BaseModel):
             raise ValueError("Review text cannot be empty")
         if not isinstance(value, str):
             raise ValueError("Review text must be a string")
-        self.__text = value
+        self._text = value
     
-    @hybrid_property
+    @property
     def rating(self):
         """
         Get the rating of the review.
         """
-        return self.__rating
+        return self._rating
     
     @rating.setter
     def rating(self, value):
@@ -65,14 +61,14 @@ class Review(BaseModel):
             raise ValueError("Rating must be an integer")
         if not (1 <= value <= 5):
             raise ValueError("Rating must be between 1 and 5")
-        self.__rating = value
+        self._rating = value
     
-    @hybrid_property
+    @property
     def place_id(self):
         """
         Get the place ID being reviewed.
         """
-        return self.__place_id
+        return self._place_id
     
     @place_id.setter
     def place_id(self, value):
@@ -81,14 +77,14 @@ class Review(BaseModel):
         """
         if not isinstance(value, str):
             raise ValueError("Place ID must be a string")
-        self.__place_id = value
+        self._place_id = value
     
-    @hybrid_property
+    @property
     def user_id(self):
         """
         Get the user ID who wrote the review.
         """
-        return self.__user_id
+        return self._user_id
     
     @user_id.setter
     def user_id(self, value):
@@ -97,4 +93,4 @@ class Review(BaseModel):
         """
         if not isinstance(value, str):
             raise ValueError("User ID must be a string")
-        self.__user_id = value
+        self._user_id = value
