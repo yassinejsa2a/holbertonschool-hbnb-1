@@ -1,18 +1,22 @@
 from app.models.base import BaseModel
 import uuid
+from app import db
+
 
 class Amenity(BaseModel):
     """
     Represents an amenity that can be associated with a place.
     """
-    def __init__(self, name):
-        """
-        Initialize a new amenity.
-        """
-        super().__init__()
-        self.name = name
 
-    @property
+    __tablename__ = 'places'
+    name = db.Column(db.String(50), nullable=False)
+    places = db.relationship(
+        'Place',
+        secondary='place_amenity',
+        back_populates='amenities'
+    )
+
+    @hybrid_property
     def name(self):
         """
         Get the amenity's name.

@@ -1,16 +1,24 @@
 from app.models.base import BaseModel
 from app.models.user import User
+from app import db
+import uuid
+
+
+place_amenity = db.Table('place_amenity',
+    Column('place_id', Integer, ForeignKey('places.id'), primary_key=True),
+    Column('amenity_id', Integer, ForeignKey('amenitys.id'), primary_key=True)
+)
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner_id):
-        super().__init__()
-        self.title = title
-        self.description = description
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.owner_id = owner_id
-        self.amenities = []
+    __tablename__ = 'places'
+    title = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Numeric(precision=10, scale=1), nullable=False)
+    longitude = db.Column(db.Numeric(precision=10, scale=1), nullable=False)
+    owner_id = db.Column(Integer, ForeignKey('users.id'), nullable=False)
+    amenities = db.relationship('Amenity', secondary=place_amenity,
+                           back_populates='places', cascade='all, delete')
 
     def add_review(self, review):
         """Add a review to the place."""
@@ -20,7 +28,7 @@ class Place(BaseModel):
         """Add an amenity to the place."""
         self.amenities.append(amenity)
 
-    @property
+    @hybrid_property
     def title(self):
         """
         Get the place's title.
@@ -34,7 +42,7 @@ class Place(BaseModel):
         """
         self.__title = value
 
-    @property
+    @hybrid_property
     def description(self):
         """
         Get the place's description.
@@ -48,7 +56,7 @@ class Place(BaseModel):
         """
         self.__description = value
 
-    @property
+    @hybrid_property
     def price(self):
         """
         Get the place's price.
@@ -64,7 +72,7 @@ class Place(BaseModel):
             raise ValueError("price must be >= 0")
         self.__price = value
 
-    @property
+    @hybrid_property
     def latitude(self):
         """
         Get the place's latitude.
@@ -83,7 +91,7 @@ class Place(BaseModel):
         self.__latitude = value
 
 
-    @property
+    @hybrid_property
     def longitude(self):
         """
         Get the place longitude.
@@ -101,7 +109,7 @@ class Place(BaseModel):
             raise ValueError('longitude must be between -180 and 180')
         self.__longitude = value
 
-    @property
+    @hybrid_property
     def owner(self):
         """
         Get the place owner.
