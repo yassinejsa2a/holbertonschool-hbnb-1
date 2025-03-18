@@ -1,5 +1,6 @@
 from app import db
 from app.models.base import BaseModel
+from sqlalchemy.ext.hybrid import hybrid_property
 
 class Review(BaseModel):
     """
@@ -19,7 +20,7 @@ class Review(BaseModel):
     place = db.relationship('Place', back_populates='reviews')
     
     
-    @property
+    @hybrid_property
     def text(self):
         """
         Get the review text.
@@ -35,9 +36,11 @@ class Review(BaseModel):
             raise ValueError("Review text cannot be empty")
         if not isinstance(value, str):
             raise ValueError("Review text must be a string")
+        if len(value) > 2048:
+            raise ValueError("Review text must be at most 2048 characters")
         self._text = value
     
-    @property
+    @hybrid_property
     def rating(self):
         """
         Get the rating of the review.
@@ -55,7 +58,7 @@ class Review(BaseModel):
             raise ValueError("Rating must be between 1 and 5")
         self._rating = value
     
-    @property
+    @hybrid_property
     def place_id(self):
         """
         Get the place ID being reviewed.
@@ -69,9 +72,11 @@ class Review(BaseModel):
         """
         if not isinstance(value, str):
             raise ValueError("Place ID must be a string")
+        if len(value) != 36:
+            raise ValueError("Place ID must be a UUID")
         self._place_id = value
     
-    @property
+    @hybrid_property
     def user_id(self):
         """
         Get the user ID who wrote the review.
@@ -85,4 +90,6 @@ class Review(BaseModel):
         """
         if not isinstance(value, str):
             raise ValueError("User ID must be a string")
+        if len(value) != 36:
+            raise ValueError("User ID must be a UUID")
         self._user_id = value
