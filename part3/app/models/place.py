@@ -1,5 +1,6 @@
 from app import db
 from app.models.base import BaseModel
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 place_amenity = db.Table(
@@ -46,23 +47,29 @@ class Place(BaseModel):
     )
 
 
-    @property
+    @hybrid_property
     def title(self):
         return self._title
 
     @title.setter
     def title(self, value):
+        if not value or len(value) > 255:
+            raise ValueError("Title must be provided and be at most 255 characters long.")
         self._title = value
 
-    @property
+    @hybrid_property
     def description(self):
         return self._description
 
     @description.setter
     def description(self, value):
+        if value and not isinstance(value, str) or len(value) > 2048:
+            raise ValueError(
+                "Description must be a string of at most 2048 characters."
+            )
         self._description = value
 
-    @property
+    @hybrid_property
     def price(self):
         return self._price
 
@@ -72,7 +79,7 @@ class Place(BaseModel):
             raise ValueError("price must be >= 0")
         self._price = value
 
-    @property
+    @hybrid_property
     def latitude(self):
         return self._latitude
 
@@ -84,7 +91,7 @@ class Place(BaseModel):
             raise ValueError('latitude must be between -90 and 90')
         self._latitude = value
 
-    @property
+    @hybrid_property
     def longitude(self):
         return self._longitude
 
@@ -96,10 +103,14 @@ class Place(BaseModel):
             raise ValueError('longitude must be between -180 and 180')
         self._longitude = value
 
-    @property
+    @hybrid_property
     def owner_id(self):
         return self._owner_id
 
     @owner_id.setter
     def owner_id(self, value):
+        if not isinstance(value, str) or len(value) != 36:
+            raise ValueError(
+                'Owner ID must be a string of 36 characters.'
+            )
         self._owner_id = value
