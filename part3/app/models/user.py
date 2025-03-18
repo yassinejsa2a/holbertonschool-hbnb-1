@@ -17,8 +17,7 @@ class User(BaseModel):
     places = db.relationship('Place', back_populates='owner', cascade='all, delete-orphan')
     reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
     
-    def __init__(self, **kwargs):
-        """Initialize a new user"""
+    """def __init__(self, **kwargs):
         # Extract attributes that need special handling
         first_name = kwargs.pop('first_name', None)
         last_name = kwargs.pop('last_name', None)
@@ -38,7 +37,7 @@ class User(BaseModel):
             self._email = email
         if password:
             self._password = bcrypt.generate_password_hash(password).decode('utf-8')
-        self._is_admin = is_admin
+        self._is_admin = is_admin"""
     
     # Hybrid properties with getters and setters
     @hybrid_property

@@ -26,23 +26,8 @@ class AuthResource(Resource):
             return {'message': 'Invalid credentials'}, 401
         
         # Generate JWT token with proper claims
-        expires = datetime.timedelta(days=7)
-        access_token = create_access_token(
-            identity={
-                'id': user.id,
-                'email': user.email,
-                'is_admin': user.is_admin
-            }, 
-            expires_delta=expires
-        )
-        
-        return {
-            'token': access_token,
-            'user': {
-                'id': user.id,
-                'email': user.email,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'is_admin': user.is_admin
-            }
-        }, 200
+        access_token = create_access_token(identity={
+            'id': str(user.id),
+            'is_admin': user.is_admin
+        })
+        return {'access_token': access_token}, 200

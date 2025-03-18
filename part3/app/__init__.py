@@ -16,29 +16,39 @@ from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.auth import api as auth_ns
 
 def create_app(config_class="config.DevelopmentConfig"):
+    # Créer l'objet Flask d'abord
     app = Flask(__name__)
+    
+    # Puis configurer l'application
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hbnb.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config.from_object(config_class)
-    api = Api(app, version="1.0", title="HBnB API", description="HBnB Application API",
-              security="Bearer", authorizations={
-                  "Bearer": {
-                      "type": "apiKey",
-                      "in": "header",
-                      "name": "Authorization"
+    
+    # Créer l'API
+    api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API',
+              security='Bearer Auth', authorizations={
+                  'Bearer Auth': {
+                      'type': 'apiKey',
+                      'in': 'header',
+                      'name': 'Authorization',
+                      'description': "Jwt authorization header"
                   }
               })
+              
+    # Initialiser les extensions
     db.init_app(app)
-
-
-    # Register the users namespace
-    api.add_namespace(users_ns, path="/api/v1/users")
-    api.add_namespace(amenities_ns, path="/api/v1/amenities")
-    api.add_namespace(places_ns, path="/api/v1/places")
-    api.add_namespace(reviews_ns, path="/api/v1/reviews")
-    api.add_namespace(auth_ns, path="/api/v1/auth")
-
     bcrypt.init_app(app)
     jwt.init_app(app)
+    
+    # Register the namespaces
+    api.add_namespace(users_ns, path='/api/v1/users')
+    api.add_namespace(amenities_ns, path='/api/v1/amenities')
+    api.add_namespace(places_ns, path='/api/v1/places')
+    api.add_namespace(reviews_ns, path='/api/v1/reviews')
+    api.add_namespace(auth_ns, path='/api/v1/auth')
 
-
+    # Créer les tables
+    with app.app_context():
+        db.create_all()
+        
     return app
-

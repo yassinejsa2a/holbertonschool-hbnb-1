@@ -37,7 +37,7 @@ CREATE TABLE reviews (
 -- Create amenities table
 CREATE TABLE amenities (
     id CHAR(36) PRIMARY KEY,
-    name VARCHAR(255) UNIQUE
+    _name VARCHAR(255) UNIQUE
 );
 
 -- Create place_amenity table

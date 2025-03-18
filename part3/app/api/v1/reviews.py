@@ -23,64 +23,41 @@ class ReviewList(Resource):
     @jwt_required()
     def post(self):
         """Register a new review"""
+        current_user = get_jwt_identity()
+        review_data = api.payload
+        if current_user.get('is_admin') is True:
+            is_admin = facade.get_user(current_user['id']).is_admin
+            if not is_admin:
+                return {'error': 'Admin privileges required.'}, 403
+        else:
+            if current_user['id'] != review_data['user_id']:
+                return {'error': 'You cannot review your own place.'}, 400
+
+        place = facade.get_place(review_data['place_id'])
+        if place is None:
+            return {'error': 'Invalid place_id.'}, 400
+
+        user = facade.get_user(review_data['user_id'])
+        if user is None:
+            return {'error': 'Invalid user_id.'}, 400
+
+        if user.id in [review.user_id for review in place.reviews]:
+            return {'error': 'You have already reviewed this place.'}, 400
+
+        if current_user['id'] == place.owner_id:
+            return {'error': 'Unauthorized action.'}, 403
+
         try:
-            review_data = api.payload
-            current_user_id = get_jwt_identity()
-            
-            # Validate required fields
-            required_fields = ['text', 'rating', 'place_id']
-            for field in required_fields:
-                if field not in review_data:
-                    return {'error': f'Missing required field: {field}'}, 400
-                if not review_data[field]:
-                    return {'error': f'Field {field} cannot be empty'}, 400
-            
-            # Set user_id from JWT token
-            review_data['user_id'] = current_user_id
-            
-            # Validate text field
-            if not isinstance(review_data['text'], str):
-                return {'error': 'Text must be a string'}, 400
-            if len(review_data['text'].strip()) == 0:
-                return {'error': 'Text cannot be empty'}, 400
-                
-            # Check if user exists
-            user = facade.get_user(current_user_id)
-            if not user:
-                return {'error': 'User not found'}, 404
-                
-            # Check if place exists
-            place = facade.get_place(review_data['place_id'])
-            if not place:
-                return {'error': 'Place not found'}, 404
-                
-            # Check if user owns the place
-            if place.owner_id == current_user_id:
-                return {'error': 'You cannot review your own place'}, 400
-                
-            # Check if user has already reviewed this place
-            existing_reviews = facade.get_reviews_by_place(review_data['place_id'])
-            for review in existing_reviews:
-                if review.user_id == current_user_id:
-                    return {'error': 'You have already reviewed this place'}, 400
-                    
-            # Validate rating range
-            if not isinstance(review_data['rating'], int) or not (1 <= review_data['rating'] <= 5):
-                return {'error': 'Rating must be an integer between 1 and 5'}, 400
-                
-            new_review = facade.create_review(review_data)
+            review = facade.create_review(review_data)
             return {
-                'id': new_review.id,
-                'text': new_review.text,
-                'rating': new_review.rating,
-                'user_id': new_review.user_id,
-                'place_id': new_review.place_id,
-            }, 201
-            
-        except (ValueError, KeyError) as e:
-            return {"error": str(e)}, 400
-        except Exception as e:
-            return {"error": str(e)}, 500
+                "id": review.id,
+                "text": review.text,
+                "rating": review.rating,
+                "user_id": review.user_id,
+                "place_id": review.place_id
+                }, 201
+        except ValueError as e:
+            return {'error': str(e)}, 400
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):

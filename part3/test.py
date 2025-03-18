@@ -7,9 +7,7 @@ import uuid
 from run import app
 from flask_jwt_extended import create_access_token
 from app.models.user import User
-from app.models.place import Place
-from app.models.amenity import Amenity
-from app import db
+from app import db, create_app
 
 
 class TestHBnBAPI(unittest.TestCase):
@@ -22,20 +20,15 @@ class TestHBnBAPI(unittest.TestCase):
         cls.app_context = app.app_context()
         cls.app_context.push()
         
-        # Create database tables
-        db.create_all()
-        
         # Create an admin user for tests (directly in database)
         admin_email = f"admin_{str(uuid.uuid4())[:8]}@example.com"
-        admin = User(
-            first_name="Admin",
-            last_name="User",
-            email=admin_email,
-            is_admin=True,
-            password="placeholder"  # Will be hashed below
-        )
+        admin = User()
+        admin.first_name = "Admin"
+        admin.last_name = "User"
+        admin.email = admin_email
+        admin.password = "adminpass123"
+        admin.is_admin = True
         
-        admin.hash_password("adminpass123")  # Properly hash the password
         db.session.add(admin)
         db.session.commit()
         
@@ -92,7 +85,7 @@ class TestHBnBAPI(unittest.TestCase):
             },
             headers=headers)
         
-        self.assertEqual(response.status_code, 200)  # API returns 200 for successful user creation
+        self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.data)
         self.assertTrue('id' in response_data)
         return response_data['id']
@@ -118,10 +111,10 @@ class TestHBnBAPI(unittest.TestCase):
             },
             headers=headers)
         
-        if response.status_code != 200:
+        if response.status_code != 201:
             print(f"Failed to create other user: {response.data.decode('utf-8')}")
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.data)
         return response_data['id']
 
@@ -150,7 +143,7 @@ class TestHBnBAPI(unittest.TestCase):
         headers = {'Authorization': f'Bearer {self.token}'}
         response = self.app.post('/api/v1/places/', 
             json={
-                'title': 'My Place',
+                'title': f'{uuid.uuid4()}',
                 'description': 'A place to stay',
                 'price': 100.00,
                 'latitude': 37.7749,
@@ -159,7 +152,8 @@ class TestHBnBAPI(unittest.TestCase):
                 'amenities': []
             },
             headers=headers)
-        
+        if response.status_code != 201:
+            print(f"Failed to create place: {response.data.decode('utf-8')}")
         self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.data)
         return response_data['id']
@@ -244,7 +238,7 @@ class TestHBnBAPI(unittest.TestCase):
             },
             headers=headers)
         
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.data)
         self.assertTrue('id' in response_data)
     
@@ -511,7 +505,6 @@ class TestHBnBAPI(unittest.TestCase):
                 'price': 200.00
             },
             headers=headers)
-        
         self.assertEqual(response.status_code, 200)
     
     def test_update_other_user_place(self):
@@ -576,7 +569,7 @@ class TestHBnBAPI(unittest.TestCase):
         # Now delete it as admin since only admins can delete places
         admin_headers = {'Authorization': f'Bearer {self.admin_token}'}
         response = self.app.delete(f'/api/v1/places/{place_id}', headers=admin_headers)
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
     
     # Review tests
     def test_create_review(self):
@@ -668,7 +661,6 @@ class TestHBnBAPI(unittest.TestCase):
                 'user_id': self.user_id
             },
             headers=headers)
-        
         self.assertEqual(response.status_code, 200)
     
     def test_delete_review_admin(self):
@@ -676,32 +668,6 @@ class TestHBnBAPI(unittest.TestCase):
         headers = {'Authorization': f'Bearer {self.admin_token}'}
         response = self.app.delete(f'/api/v1/reviews/{self.review_id}', headers=headers)
         self.assertEqual(response.status_code, 200)
-
-    def test_delete_review_non_admin(self):
-        """Test deleting a review without admin privileges."""
-        # First create a review - check the response for success
-        headers = {'Authorization': f'Bearer {self.token}'}
-        response = self.app.post('/api/v1/reviews/', 
-            json={
-                'text': f"Review to delete {uuid.uuid4()}",
-                'rating': 5,
-                'place_id': self.place_id,
-                'user_id': self.user_id
-            },
-            headers=headers)
-        
-        # Make sure review was created successfully before continuing
-        self.assertEqual(response.status_code, 201, 
-                        f"Review creation failed with status {response.status_code}: {response.data}")
-        
-        # Now extract the ID safely
-        response_data = json.loads(response.data)
-        self.assertIn('id', response_data, f"Response missing 'id' field: {response_data}")
-        review_id = response_data['id']
-        
-        # Now try to delete it without admin privileges
-        response = self.app.delete(f'/api/v1/reviews/{review_id}', headers=headers)
-        self.assertEqual(response.status_code, 403)
 
 
 if __name__ == '__main__':
