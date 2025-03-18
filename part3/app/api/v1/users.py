@@ -81,12 +81,12 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
         
         # Get current user identity and check admin status
-        current_user_id = get_jwt_identity()
-        is_admin = current_user_id.get('is_admin', False)
+        current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
         
         # If not admin, restrict to own profile and only first/last name
         if not is_admin:
-            if str(user.id) != str(current_user_id):
+            if str(user.id) != str(current_user.get('id')):
                 return {'error': 'Unauthorized action.'}, 403
             
             # Check if user is trying to modify email or password
@@ -107,8 +107,7 @@ class UserResource(Resource):
                     'last_name': user_data.get('last_name', user.last_name)
                 }
                 facade.update_user(user.id, update_data)
-                user.first_name = update_data['first_name']
-                user.last_name = update_data['last_name']
+                user = facade.get_user(user_id)  # Get fresh user data
             except Exception as e:
                 return {'error': str(e)}, 400
             
@@ -131,8 +130,7 @@ class UserResource(Resource):
             
             # Handle password update
             if 'password' in user_data:
-                hashed_password = user.hash_password(user_data['password'])
-                update_data['password'] = hashed_password
+                update_data['password'] = user_data['password']
             
             # If no changes to apply
             if not update_data:
@@ -140,9 +138,7 @@ class UserResource(Resource):
                 
             try:
                 facade.update_user(user.id, update_data)
-                # Update user object with new values for response
-                for key, value in update_data.items():
-                    setattr(user, key, value)
+                user = facade.get_user(user_id)  # Get fresh user data
             except Exception as e:
                 return {'error': str(e)}, 400
         
