@@ -1,5 +1,8 @@
 from app import db
 from app.models.base import BaseModel
+from sqlalchemy.ext.hybrid import hybrid_property
+from app.models.place import place_amenity
+
 
 
 class Amenity(BaseModel):
@@ -13,11 +16,11 @@ class Amenity(BaseModel):
 
     places = db.relationship(
         'Place',
-        secondary='place_amenity',
+        secondary=place_amenity,
         back_populates='amenities'
     )
 
-    @property
+    @hybrid_property
     def name(self):
         """
         Get the amenity's name.
