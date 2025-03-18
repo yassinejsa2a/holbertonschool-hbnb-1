@@ -79,6 +79,17 @@ class User(BaseModel):
         self._email = value
 
     @property
+    def password(self):
+        """Get the hashed password."""
+        return self._password
+
+    @password.setter
+    def password(self, value):
+        """Set and hash the password before storing it."""
+        self._password = bcrypt.generate_password_hash(value).decode('utf-8')
+
+
+    @property
     def is_admin(self):
         """
         Get the user's admin status.
