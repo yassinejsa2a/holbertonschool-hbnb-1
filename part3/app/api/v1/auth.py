@@ -1,32 +1,48 @@
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import create_access_token
 from app.services import facade
+from flask_jwt_extended import create_access_token
+import datetime
 
 api = Namespace('auth', description='Authentication operations')
 
-# Model for input validation
 login_model = api.model('Login', {
     'email': fields.String(required=True, description='User email'),
     'password': fields.String(required=True, description='User password')
 })
 
-
 @api.route('/login')
-class Login(Resource):
-    @api.expect(login_model)
+class AuthResource(Resource):
+    @api.expect(login_model, validate=True)
     def post(self):
-        """Authenticate user and return a JWT token"""
-        credentials = api.payload  # Get the email and password from the request payload
-        
-        # Step 1: Retrieve the user based on the provided email
+        """User login endpoint"""
+        credentials = api.payload
         user = facade.get_user_by_email(credentials['email'])
         
-        # Step 2: Check if the user exists and the password is correct
-        if not user or not user.verify_password(credentials['password']):
-            return {'error': 'Invalid credentials'}, 401
-
-        # Step 3: Create a JWT token with the user's id and is_admin flag
-        access_token = create_access_token(identity={'id': str(user.id), 'is_admin': user.is_admin})
+        if not user:
+            return {'message': 'Invalid credentials'}, 401
+            
+        # Check if we're using bcrypt correctly
+        if not user.verify_password(credentials['password']):
+            return {'message': 'Invalid credentials'}, 401
         
-        # Step 4: Return the JWT token to the client
-        return {'access_token': access_token}, 200
+        # Generate JWT token with proper claims
+        expires = datetime.timedelta(days=7)
+        access_token = create_access_token(
+            identity={
+                'id': user.id,
+                'email': user.email,
+                'is_admin': user.is_admin
+            }, 
+            expires_delta=expires
+        )
+        
+        return {
+            'token': access_token,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'is_admin': user.is_admin
+            }
+        }, 200
