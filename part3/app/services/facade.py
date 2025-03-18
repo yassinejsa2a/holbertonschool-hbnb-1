@@ -1,9 +1,8 @@
-from app.persistence.repository import SQLAlchemyRepository, UserRepository, AmenityRepository, PlaceRepository, ReviewRepository
+from app.persistence.repository import UserRepository, AmenityRepository, PlaceRepository, ReviewRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
-from app import db
 
 class HBnBFacade:
     def __init__(self):
