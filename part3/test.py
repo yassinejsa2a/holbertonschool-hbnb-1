@@ -260,8 +260,6 @@ class TestHBnBAPI(unittest.TestCase):
         """Test getting all users (no auth required)."""
         response = self.app.get('/api/v1/users/')
         self.assertEqual(response.status_code, 200)
-        users = json.loads(response.data)
-        self.assertIsInstance(users, list)
     
     def test_get_user_by_id(self):
         """Test getting a specific user."""

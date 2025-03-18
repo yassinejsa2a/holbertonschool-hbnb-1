@@ -121,49 +121,43 @@ class ReviewResource(Resource):
     @api.response(400, 'Invalid input data')
     @jwt_required()
     def put(self, review_id):
-        """Update review details"""
+        """Update a review's information"""
+        current_user = get_jwt_identity()
+        review_data = api.payload
+        
+        # Validate input fields
+        for key in review_data:
+            if key not in ['text', 'rating', 'user_id', 'place_id']:
+                return {'error': 'Invalid input data.'}, 400
+        
+        # Get the current review
+        review = facade.get_review(review_id)
+        if not review:
+            return {'error': 'Review not found.'}, 404
+        
+        # Only allow updating your own review
+        if current_user['id'] != review.user_id:
+            return {'error': 'You can only update your own reviews.'}, 403
+        
+        # Create a copy of the data for updating
+        update_data = {}
+        if 'text' in review_data:
+            update_data['text'] = review_data['text']
+        if 'rating' in review_data:
+            update_data['rating'] = review_data['rating']
+        
         try:
-            # Get existing review
-            review = facade.get_review(review_id)
-            if not review:
-                return {"error": "Review not found"}, 404
-                
-            # Check if user is authorized to update this review
-            current_user_id = get_jwt_identity()
-            if current_user_id != review.user_id:
-                return {"error": "Unauthorized action."}, 403
-
-            update_data = api.payload
-
-            # Validate rating if provided
-            if 'rating' in update_data and not (isinstance(update_data['rating'], int) and 1 <= update_data['rating'] <= 5):
-                return {'error': 'Rating must be an integer between 1 and 5'}, 400
-
-            # Validate text if provided
-            if 'text' in update_data:
-                if not isinstance(update_data['text'], str) or len(update_data['text'].strip()) == 0:
-                    return {'error': 'Text must be a non-empty string'}, 400
-
-            # Don't allow changing user_id
-            if 'user_id' in update_data and update_data['user_id'] != current_user_id:
-                return {'error': 'Cannot change the review author'}, 403
-
-            # Update the review
             facade.update_review(review_id, update_data)
-            updated_review = facade.get_review(review_id)
-
-            return {
-                'id': updated_review.id,
-                'text': updated_review.text,
-                'rating': updated_review.rating,
-                'user_id': updated_review.user_id,
-                'place_id': updated_review.place_id
-            }, 200
-
         except ValueError as e:
             return {'error': str(e)}, 400
-        except Exception as e:
-            return {'error': 'Internal server error'}, 500
+        
+        return {
+            'id': update_data.id,
+            'text': update_data.text,
+            'rating': update_data.rating,
+            'user_id': update_data.user_id,
+            'place_id': update_data.place_id
+        }, 200
 
     @api.response(204, 'Review deleted successfully')
     @api.response(404, 'Review not found')
