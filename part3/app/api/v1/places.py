@@ -157,22 +157,22 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
-        current_user_id = get_jwt_identity()
+        current_user = get_jwt_identity()
         
-        # Check if the user ID is a dictionary and extract the ID
-        if isinstance(current_user_id, dict) and 'id' in current_user_id:
-            current_user_id = current_user_id['id']
-        elif isinstance(current_user_id, dict):
-            # Try to find the user ID in the dictionary
-            for key in ['id', 'user_id', '_id', 'sub']:
-                if key in current_user_id:
-                    current_user_id = current_user_id[key]
-                    break
-            else:
-                return {'error': 'Could not determine user ID from token'}, 400
+        # Check if the user identity is a dictionary and extract the relevant data
+        if isinstance(current_user, dict):
+            current_user_id = current_user.get('id')
+            is_admin = current_user.get('is_admin', False)
+        else:
+            current_user_id = current_user
+            is_admin = False
         
-        # Check if current user is the owner
-        if current_user_id != place.owner_id:
+        # If user ID couldn't be extracted
+        if not current_user_id:
+            return {'error': 'Could not determine user ID from token'}, 400
+        
+        # Allow update if user is admin or is the owner of the place
+        if not is_admin and current_user_id != place.owner_id:
             return {'error': 'Unauthorized action'}, 403
 
         update_data = api.payload
@@ -184,7 +184,7 @@ class PlaceResource(Resource):
                 'id': updated_place.id,
                 'title': updated_place.title,
                 'description': updated_place.description,
-                'price': updated_place.price,
+                'price': str(updated_place.price),
                 'latitude': updated_place.latitude,
                 'longitude': updated_place.longitude,
                 'owner_id': updated_place.owner_id,
