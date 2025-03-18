@@ -1,6 +1,8 @@
 from app.models.base import BaseModel
 from flask_bcrypt import Bcrypt
 from app import db, bcrypt
+from sqlalchemy.ext.hybrid import hybrid_property
+import re
 
 bcrypt = Bcrypt()
 
@@ -26,7 +28,7 @@ class User(BaseModel):
         """Verify the hashed password."""
         return bcrypt.check_password_hash(self.password, password)
 
-    @property
+    @hybrid_property
     def first_name(self):
         """
         Get the user's first name.
@@ -44,7 +46,7 @@ class User(BaseModel):
                 )
         self._first_name = value
 
-    @property
+    @hybrid_property
     def last_name(self):
         """
         Get the user's last name.
@@ -62,7 +64,7 @@ class User(BaseModel):
                 )
         self._last_name = value
 
-    @property
+    @hybrid_property
     def email(self):
         """
         Get the user's email.
@@ -74,11 +76,16 @@ class User(BaseModel):
         """
         Set the user's email.
         """
-        if not isinstance(value, str) or '@' not in value:
-            raise ValueError("Valid email is required")
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not value or len(value) > 255:
+            raise ValueError(
+                'Email must be provided and be less than 255 characters.'
+                )
+        if not re.match(email_regex, value):
+            raise ValueError('Invalid email format.')
         self._email = value
 
-    @property
+    @hybrid_property
     def password(self):
         """Get the hashed password."""
         return self._password
@@ -89,7 +96,7 @@ class User(BaseModel):
         self._password = bcrypt.generate_password_hash(value).decode('utf-8')
 
 
-    @property
+    @hybrid_property
     def is_admin(self):
         """
         Get the user's admin status.
