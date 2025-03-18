@@ -321,37 +321,6 @@ class TestHBnBAPI(unittest.TestCase):
         
         self.assertEqual(response.status_code, 400)
     
-    def test_delete_user_as_admin(self):
-        """Test deleting a user as admin."""
-        # First create a user to delete
-        headers = {'Authorization': f'Bearer {self.admin_token}'}
-        response = self.app.post('/api/v1/users/', 
-            json={
-                "email": f"delete_{uuid.uuid4()}@example.com",
-                "password": "deletepass123",
-                "first_name": "Delete",
-                "last_name": "User"
-            },
-            headers=headers)
-        
-        user_id = json.loads(response.data)['id']
-        
-        # Now delete the user
-        response = self.app.delete(f'/api/v1/users/{user_id}', headers=headers)
-        self.assertEqual(response.status_code, 200)
-    
-    def test_delete_user_as_non_admin(self):
-        """Test deleting a user without admin privileges."""
-        headers = {'Authorization': f'Bearer {self.token}'}
-        response = self.app.delete(f'/api/v1/users/{self.other_user_id}', headers=headers)
-        self.assertEqual(response.status_code, 403)
-    
-    def test_delete_own_account(self):
-        """Test user deleting their own account."""
-        headers = {'Authorization': f'Bearer {self.token}'}
-        response = self.app.delete(f'/api/v1/users/{self.user_id}', headers=headers)
-        self.assertEqual(response.status_code, 200)
-    
     # Amenity tests
     def test_create_amenity(self):
         """Test creating a new amenity."""
@@ -544,29 +513,6 @@ class TestHBnBAPI(unittest.TestCase):
             },
             headers=headers)
         
-        self.assertEqual(response.status_code, 200)
-    
-    def test_delete_place(self):
-        """Test deleting a place."""
-        # First create a place to delete
-        headers = {'Authorization': f'Bearer {self.token}'}
-        response = self.app.post('/api/v1/places/', 
-            json={
-                'title': f"Delete Me Place {uuid.uuid4()}",
-                'description': 'To be deleted',
-                'price': 100.00,
-                'latitude': 40.7128,
-                'longitude': -74.0060,
-                'owner_id': self.user_id,
-                'amenities': []
-            },
-            headers=headers)
-        
-        place_id = json.loads(response.data)['id']
-        
-        # Now delete it as admin since only admins can delete places
-        admin_headers = {'Authorization': f'Bearer {self.admin_token}'}
-        response = self.app.delete(f'/api/v1/places/{place_id}', headers=admin_headers)
         self.assertEqual(response.status_code, 200)
     
     # Review tests

@@ -164,16 +164,22 @@ class ReviewResource(Resource):
     @jwt_required()
     def delete(self, review_id):
         """Delete a review"""
+        current_user = get_jwt_identity()
         review = facade.get_review(review_id)
+        
         if not review:
-            return {"error": "Review not found"}, 404
+            return {'error': 'Review not found.'}, 404
             
-        current_user_id = get_jwt_identity()
-        if current_user_id != review.user_id:
-            return {"error": "Unauthorized action."}, 403
-
-        facade.delete_review(review_id)
-        return {"message" : "Review deleted successfully"}, 204
+        is_admin = False
+        if current_user.get('is_admin') is True:
+            is_admin = facade.get_user(current_user['id']).is_admin
+        
+        # Allow users to delete their own reviews or admins to delete any review
+        if current_user['id'] == review.user_id or is_admin:
+            facade.delete_review(review_id)
+            return {'message': 'Review deleted successfully.'}, 200
+        
+        return {'error': 'Unauthorized. You can only delete your own reviews.'}, 403
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
