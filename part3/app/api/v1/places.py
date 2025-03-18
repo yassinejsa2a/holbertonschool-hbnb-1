@@ -174,7 +174,6 @@ class PlaceResource(Resource):
             return {'error': 'Unauthorized action'}, 403
 
         update_data = api.payload
-
         try:
             facade.update_place(place_id, update_data)
             updated_place = facade.get_place(place_id)  # Get updated place
