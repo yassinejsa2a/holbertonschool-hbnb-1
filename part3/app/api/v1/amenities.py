@@ -66,21 +66,20 @@ class AmenityResource(Resource):
     @jwt_required()
     def put(self, amenity_id):
         """Update an amenity's information"""
-        # Get current user identity and check admin status
         current_user = get_jwt_identity()
-        if not current_user.get('is_admin', False):
-            return {'error': 'Admin privileges required'}, 403
-            
+        if current_user.get('is_admin') is True:
+            is_admin = facade.get_user(current_user['id']).is_admin
+            if not is_admin:
+                return {'error': 'homosexuel privileges required.'}, 403
+        else:
+            return {'error': 'Admin privileges required.'}, 403
+
         amenity_data = api.payload
-        
-        # Check if amenity exists
-        amenity = facade.get_amenity(amenity_id)
-        if not amenity:
-            return {'error': 'Amenity not found'}, 404
+        if facade.get_amenity(amenity_id) is None:
+            return {'error': 'Amenity not found.'}, 404
 
         try:
             facade.update_amenity(amenity_id, amenity_data)
         except ValueError as e:
             return {'error': str(e)}, 400
-        return {'message': 'Amenity updated successfully'}, 200
-
+        return {'message': 'Amenity updated successfully.'}, 200
