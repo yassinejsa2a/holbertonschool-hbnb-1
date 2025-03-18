@@ -41,28 +41,28 @@ class PlaceList(Resource):
     @api.response(400, 'Title already registered')
     @api.response(400, 'Invalid input data')
     @api.response(404, 'Owner not found')
+    @api.response(403, 'Unauthorized action')
     @jwt_required()
     def post(self):
         """Register a new place"""
         place_data = api.payload
-        current_user_id = get_jwt_identity()
+        current_user = get_jwt_identity()
         
         # Check if the user ID is a dictionary and extract the ID
-        if isinstance(current_user_id, dict) and 'id' in current_user_id:
-            current_user_id = current_user_id['id']
-        elif isinstance(current_user_id, dict):
-            # Try to find the user ID in the dictionary
-            for key in ['id', 'user_id', '_id', 'sub']:
-                if key in current_user_id:
-                    current_user_id = current_user_id[key]
-                    break
-            else:
-                return {'error': 'Could not determine user ID from token'}, 400
-                
-        place_data['owner_id'] = current_user_id
-
-        if current_user_id != place_data['owner_id']:
-            return {'error': 'Unauthorized action'}, 403
+        if isinstance(current_user, dict):
+            current_user_id = current_user.get('id')
+            is_admin = current_user.get('is_admin', False)
+        else:
+            current_user_id = current_user
+            is_admin = False
+            
+        # If user ID couldn't be extracted
+        if not current_user_id:
+            return {'error': 'Could not determine user ID from token'}, 400
+        
+        # Check authorization - users can only create places for themselves unless they're admins
+        if not is_admin and current_user_id != place_data['owner_id']:
+            return {'error': 'Unauthorized action - cannot create places for other users'}, 403
 
         try:
             owner = facade.get_user(place_data['owner_id'])
@@ -87,8 +87,6 @@ class PlaceList(Resource):
 
         except ValueError as e:
             return {'error': str(e)}, 400
-
-
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
