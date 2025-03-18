@@ -114,7 +114,7 @@ class ReviewResource(Resource):
             'place_id': review.place_id
         }, 200
 
-    @api.expect(review_model, validate=True)
+    @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
     @api.response(403, 'Not authorized to update this review')
     @api.response(404, 'Review not found')

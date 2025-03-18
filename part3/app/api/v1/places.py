@@ -139,14 +139,14 @@ class PlaceResource(Resource):
             'id': place.id,
             'title': place.title,
             'description': place.description,
-            'price': place.price,
+            'price': str(place.price),
             'latitude': place.latitude,
             'longitude': place.longitude,
             'owner': owner_data,
             'amenities': amenity_data
         }, 200
 
-    @api.expect(place_model, validate=True)
+    @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')

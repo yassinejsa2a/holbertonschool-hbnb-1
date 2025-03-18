@@ -61,12 +61,7 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
 
-    @api.expect(api.model('UserUpdate', {
-        'first_name': fields.String(description='First name of the user', min_length=1, max_length=50),
-        'last_name': fields.String(description='Last name of the user', min_length=1, max_length=50),
-        'email': fields.String(description='Email of the user'),
-        'password': fields.String(description='Password of the user')
-    }), validate=True)
+    @api.expect(user_model)
     @api.response(200, 'User successfully updated')
     @api.response(400, 'Invalid input data')
     @api.response(403, 'Unauthorized operation')
