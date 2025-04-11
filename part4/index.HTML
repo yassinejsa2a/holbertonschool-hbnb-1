@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Housing Catalog</title>
+    <link rel="icon" href="images/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <img src="images/logo.png" alt="Logo" class="logo">
+            <div class="nav-links">
+                <a href="login.html" id="login-link" class="login-button">Login</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <h1 class="page-title">Available Accommodations</h1>
+        <section id="filters">
+            <label for="price-filter">Price filter:</label>
+            <select id="price-filter">
+                <option value="25">Under $25</option>
+                <option value="75">Under $75</option>
+                <option value="150">Under $150</option>
+                <option value="all" selected>All prices</option>
+            </select>
+        </section>
+        <section id="places-list">
+            <div class="place-card">
+                <h3>Downtown Studio</h3>
+                <p class="price">$45 per night</p>
+                <a href="place.html?id=101"><button class="details-button">View Details</button></a>
+            </div>
+            
+            <div class="place-card">
+                <h3>Bright Apartment</h3>
+                <p class="price">$65 per night</p>
+                <a href="place.html?id=102"><button class="details-button">View Details</button></a>
+            </div>
+            
+            <div class="place-card">
+                <h3>Seaside House</h3>
+                <p class="price">$120 per night</p>
+                <a href="place.html?id=103"><button class="details-button">View Details</button></a>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 - All rights reserved</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accommodation Listings</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/icon.png">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="index.html"><img class="logo" src="images/logo2.png" alt="Accommodations Logo"></a>
+            <nav>
+                <a class="login-button" href="login.html" id="login-link">Login</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section id="filter-section">
+            <h2>Find Your Perfect Place</h2>
+            <div class="filter-controls">
+                <label for="price-filter">Max Price:</label>
+                <select id="price-filter">
+                    <option value="50">$50</option>
+                    <option value="100">$100</option>
+                    <option value="200">$200</option>
+                    <option value="all" selected>All Prices</option>
+                </select>
+            </div>
+        </section>
+        
+        <section id="places-list">
+            <div class="place-card">
+                <img src="images/place1.jpg" alt="Downtown Apartment" class="place-image">
+                <h3>Downtown Apartment</h3>
+                <p class="price">$85 per night</p>
+                <a href="place.html?id=1"><button class="details-button">View Details</button></a>
+            </div>
+            
+            <div class="place-card">
+                <img src="images/place2.jpg" alt="Beachfront Villa" class="place-image">
+                <h3>Beachfront Villa</h3>
+                <p class="price">$150 per night</p>
+                <a href="place.html?id=2"><button class="details-button">View Details</button></a>
+            </div>
+            
+            <div class="place-card">
+                <img src="images/place3.jpg" alt="Mountain Cabin" class="place-image">
+                <h3>Mountain Cabin</h3>
+                <p class="price">$95 per night</p>
+                <a href="place.html?id=3"><button class="details-button">View Details</button></a>
+            </div>
+            
+            <div class="place-card">
+                <img src="images/place4.jpg" alt="City Loft" class="place-image">
+                <h3>City Loft</h3>
+                <p class="price">$75 per night</p>
+                <a href="place.html?id=4"><button class="details-button">View Details</button></a>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 - All rights reserved</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
